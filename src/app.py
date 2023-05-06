@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 
-from seasonally import SeasonallyInput
+from src.seasonally import SeasonallyInput
 
 
 
@@ -13,26 +13,66 @@ st.set_page_config(
 )
 
 
+with st.sidebar:
+
+    st.image("ambev-tech-logo-amarelo-sem-fundo.png")
+
+    st.header("Database Input")
+    st.markdown('Please, attach below the **Actual Excel File** in order to begin...')
+
+    # st.image("input_model.png", caption='Input Model Example')
+    input_file = st.file_uploader(label= "Upload your Excel file here...", label_visibility='collapsed')
+    button = st.button('Launch!')
+
+    
+    
+    if button == True:
+
+        SI = SeasonallyInput()
+
+        df_raw = SI.dataframe_reading(path=input_file)
+
+        # Actuals Table
+        df = df_raw[df_raw.index[0]:df_raw.index[-1]].fillna(0)
+        columns_list = df.columns.tolist()
+
+        tab1, tab2 = st.tabs(["All Columns", "Columns Anlaysis"])
+
+        with tab1:
+             
+            st.success("Done!")
 
 
-st.header('FP&A Seasonally Platform')
-st.markdown('Please, attach below the **Actual Excel File** in order to begin...')
-st.image("input_model.png", caption='Input Model Example')
-input_file = st.file_uploader("Upload your Excel file here...")
-button = st.button('Launch!')
+        with tab2:
+
+            targets = st.multiselect(label="Columns to be considered:", options=columns_list)
+
+    
 
 
 
+# st.header('FP&A Seasonally Platform')
+# input_file = st.file_uploader("Upload your Excel file here...")
+# button = st.button('Launch!')
+        
 
 
 if button == True:
 
-    SI = SeasonallyInput()
 
-    df_raw = SI.dataframe_reading(path=input_file)
+    st.markdown("# FP&A Seasonally Platform")
+    st.markdown("## Data Information")
 
-    # Actuals Table
-    df = df_raw[df_raw.index[0]:df_raw.index[-1]].fillna(0)
+    data_inicial = df_raw.index.sort_values(ascending=True)[0].date()
+    data_final = df_raw.index.sort_values(ascending=False)[0].date()
+    cols_qtd = len(df_raw.columns.tolist())
+
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Initial Date", str(data_inicial))
+    col2.metric("Last Date", str(data_final))
+    col3.metric("Amount of Targets", cols_qtd)
+
+
 
     trend_df = pd.DataFrame(index=df.index)
     seasonal_df = pd.DataFrame(index=df.index)
@@ -81,6 +121,13 @@ if button == True:
     st.markdown('(Actual values without Trend and Seasonal Components)')
     #st.download_button(label='📥 Download Current Result', data=residual_df.to_excel(excel_writer='openpyxl'), file_name= 'ResidualDF.xlsx')
     st.dataframe(residual_df)
+
+
+else:
+
+    st.markdown("# FP&A Seasonally Platform")
+    st.markdown("## <-- Please, upload your excel file...")
+
 
    
 

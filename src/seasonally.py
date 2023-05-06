@@ -17,7 +17,8 @@ class SeasonallyInput:
             raw_dataframe[column_name], 
             model='mul', 
             period=12, 
-            extrapolate_trend=True
+            extrapolate_trend=True,
+            two_sided=True
         )
 
         return results
